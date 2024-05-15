@@ -32,6 +32,20 @@ public interface ProductService {
 
     //Update a product
 
-    //Delete a product
+    public Product updateProduct(int productId,
+                                 String title,
+                                 String description,
+                                 String imageUrl,
+                                 String category,
+                                 double price) throws ProductNotFoundException;
 
+    public Product replaceProduct(int productId,
+                                  String title,
+                                  String description,
+                                  String imageUrl,
+                                  String category,
+                                  double price) throws ProductNotFoundException;
+
+    //Delete a product
+    public Product deleteProduct(int productId) throws ProductNotFoundException;
 }

@@ -1,6 +1,7 @@
 package com.satyabhushan.product_service.controllers;
 
 import com.satyabhushan.product_service.dtos.ErrorDto;
+import com.satyabhushan.product_service.dtos.ProductDeleteResponseDto;
 import com.satyabhushan.product_service.dtos.ProductRequestDto;
 import com.satyabhushan.product_service.dtos.ProductResponseDto;
 import com.satyabhushan.product_service.exceptions.ProductNotFoundException;
@@ -26,11 +27,16 @@ public class productController {
         this.modelMapper = modelMapper;
     }
 
-    private ProductResponseDto convetToProductResponseDto(Product product) {
+    private ProductResponseDto convertToProductResponseDto(Product product) {
         String categoryTitle = product.getCategory().getTitle();
         ProductResponseDto productResponseDto = modelMapper.map(product, ProductResponseDto.class);
         productResponseDto.setCategory(categoryTitle);
         return productResponseDto;
+    }
+
+    private ProductDeleteResponseDto convertToProductDeleteResponseDto(Product product) {
+        ProductDeleteResponseDto productDeleteResponseDto = modelMapper.map(product, ProductDeleteResponseDto.class);
+        return productDeleteResponseDto;
     }
 
     //Add Exception Handler
@@ -47,7 +53,7 @@ public class productController {
         List<Product> productList =  productService.getAllProducts();
         List<ProductResponseDto> productResponseDtoList = new ArrayList<>();
         for (Product product : productList) {
-            productResponseDtoList.add(convetToProductResponseDto(product));
+            productResponseDtoList.add(convertToProductResponseDto(product));
         }
         return productResponseDtoList;
     }
@@ -57,7 +63,7 @@ public class productController {
     @GetMapping("/products/{id}")
     public ProductResponseDto getProduct(@PathVariable("id") int productId) throws ProductNotFoundException {
         Product product = productService.getSingleProduct(productId);
-        return convetToProductResponseDto(product);
+        return convertToProductResponseDto(product);
     }
 
     //Get all categories
@@ -80,15 +86,54 @@ public class productController {
                 productRequestDto.getTitle() , productRequestDto.getDescription(),
                 productRequestDto.getImage() , productRequestDto.getCategory() , productRequestDto.getPrice());
 //       return modelMapper.map(product, ProductResponseDto.class);
-        ProductResponseDto response = convetToProductResponseDto(product);
+        ProductResponseDto response = convertToProductResponseDto(product);
         return new ResponseEntity<>(response, HttpStatus.CREATED);
     }
 
 
     //Update a product
 
+    @PatchMapping("/products/{id}")
+    public ResponseEntity<ProductResponseDto> updateProduct(@PathVariable("id") int productId,
+                                                            @RequestBody ProductRequestDto productRequestDto)
+            throws ProductNotFoundException {
+        Product product = productService.updateProduct(productId,
+                productRequestDto.getTitle(),
+                productRequestDto.getDescription(),
+                productRequestDto.getImage(),
+                productRequestDto.getCategory(),
+                productRequestDto.getPrice() );
+        ProductResponseDto productResponseDto = convertToProductResponseDto(product);
+        return new ResponseEntity<>(productResponseDto, HttpStatus.OK);
+    }
+
+    @PutMapping("/products/{id}")
+    public ResponseEntity<ProductResponseDto> replaceProduct(@PathVariable("id") int productId,
+                                                             @RequestBody ProductRequestDto productRequestDto)
+            throws ProductNotFoundException {
+        Product product = productService.replaceProduct(productId,
+                productRequestDto.getTitle(),
+                productRequestDto.getDescription(),
+                productRequestDto.getImage(),
+                productRequestDto.getCategory(),
+                productRequestDto.getPrice() );
+        ProductResponseDto productResponseDto = convertToProductResponseDto(product);
+        return new ResponseEntity<>(productResponseDto, HttpStatus.OK);
+    }
+
+
 
     //Delete a product
+    @DeleteMapping("/products/{id}")
+    public ResponseEntity<ProductDeleteResponseDto> deleteProduct(@PathVariable("id") int productId)
+            throws ProductNotFoundException {
+        Product product = productService.deleteProduct(productId);
+        ProductDeleteResponseDto productDeleteResponseDto = convertToProductDeleteResponseDto(product);
+        productDeleteResponseDto.setRemoval_Response("Successfully deleted product");
+        return new ResponseEntity<>(productDeleteResponseDto, HttpStatus.OK);
+    }
+
+
 
 
 
